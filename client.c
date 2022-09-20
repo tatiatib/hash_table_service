@@ -46,7 +46,9 @@ void create_get_operation(request * shared_request, char * key){
     strcpy((char * )shared_request->buffer + sizeof(size_t), key);
     
 }
-
+/*
+    Generate dummy key pool with random strings
+*/
 void generate_key_pool(char ** key_pool){
     char * alphabet = "abcdefghijklmnopqrstuvwxyz";
     int index;
@@ -103,7 +105,7 @@ int main(){
         }
     }
     
-    //Finish
+    //Finish -  send operation stop
     while (1){
         if(!sem_wait(&shared_request->sem)){
             if (shared_request->read == 0){
@@ -122,6 +124,7 @@ int main(){
     printf("Time to process %d requests -  %f seconds.\n", REQUESTS_NUM, time_elapsed);
     printf("Thoughput %f requests/second\n", REQUESTS_NUM / time_elapsed);
     
+    //Free up allocated memory
     munmap(shared_request, MEM_SIZE);
     close(fd);
 

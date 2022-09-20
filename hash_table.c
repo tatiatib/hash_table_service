@@ -17,6 +17,7 @@ unsigned long hash(char *str){
     return hash;
 }
 
+/* Create table, initialize  node heads for each buckets, initialize locks for each bucket */
 hash_table * create_table(int cap){
     hash_table * table = (hash_table *) malloc(sizeof(hash_table));
     table->cap = cap;
@@ -45,6 +46,7 @@ void free_nodes(node * head){
     }
 }
 
+/*Delete all allocated data*/
 void table_dispose(hash_table * table){
     for (int i = 0; i < table->cap; i ++ ){
         free_nodes(table->values[i]);
@@ -53,6 +55,7 @@ void table_dispose(hash_table * table){
     free(table);
 }
 
+/*Change value for already existed node key*/
 void change_value(node * cur, void * value, size_t value_size){
     free(cur->value);
     cur->value = malloc(value_size);
@@ -60,6 +63,7 @@ void change_value(node * cur, void * value, size_t value_size){
     cur->value_size = value_size;
 }
 
+/*Insert new key into the table, lock only bucket where new node will be located */
 void insert_key(hash_table *table, char * key, void * value, size_t value_size){
     unsigned long hash_value = hash(key);
     int index = (int)(hash_value % table->cap);
@@ -87,6 +91,8 @@ void insert_key(hash_table *table, char * key, void * value, size_t value_size){
     cur->next = new_node;
     pthread_mutex_unlock(table->locks[index]);
 }
+
+/*Get value of the key, if key doesn't exist NULL pointer is returned for value*/
 
 void * get_key(hash_table * table, char * key){
     unsigned long hash_value = hash(key);
@@ -116,7 +122,7 @@ void delete_node(node * prev, node * cur){
     free(cur);
 }
 
-
+/* Delete key if it exists in the table, otherwise no action*/
 void delete_key(hash_table * table, char * key){
     unsigned long hash_value = hash(key);
     int index = (int)(hash_value % table->cap);
