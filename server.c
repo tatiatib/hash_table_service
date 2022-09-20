@@ -17,6 +17,7 @@
 #define GET 1
 #define DELETE 2
 #define STOP 3
+#define N_THREADS 4
 
 volatile int RUN;
 
@@ -66,8 +67,6 @@ void * process_requests(void * data){
                 continue;
             }
             shared_request->read = 1;
-            printf("cur operation %d executed by %ld\n", cur_op, pthread_self());
-    
             key = parse_key(shared_request->buffer);
             
             if (cur_op == INSERT){
@@ -75,17 +74,14 @@ void * process_requests(void * data){
                 value = parse_value(shared_request->buffer, value_size);
             }
             sem_post(&shared_request->sem);
-
             if (cur_op == INSERT){
                 insert_key(table, key, value, value_size);
                 res = get_key(table, key);
-                printf("cur value is %d\n", *(int *)res);
                 free(value);
                 free(res);
                 free(key);
             }else if(cur_op == GET){
                 res = get_key(table, key);
-                //SHOULD RETURN THIS
                 free(res);
                 free(key);
             }else if(cur_op == DELETE){
@@ -95,7 +91,6 @@ void * process_requests(void * data){
 
         }    
     }
-    printf("THread is done .... \n");
 }
 
 int main(int argc, char **argv){
@@ -120,15 +115,17 @@ int main(int argc, char **argv){
 
     void * data[2] = {(void *)shared_request, (void *)table};
 
-    pthread_t thread_1, thread_2;
+    pthread_t threads[N_THREADS];
+    for (int i = 0; i < N_THREADS; i ++ ){
+        if (pthread_create(&threads[i], NULL, process_requests, data) != 0){
+          break;
+        }
+    }
 
-    pthread_create(&thread_1, NULL, process_requests, data); 
-    pthread_create(&thread_2, NULL, process_requests, data); 
-
-    pthread_join(thread_1, NULL);
-    pthread_join(thread_2, NULL); 
-
-
+    for (int i = 0; i < N_THREADS; i ++ ){
+        pthread_join(threads[i], NULL);
+    }
+    
     sem_close(&shared_request->sem);
     munmap(shared_request, MEM_SIZE);
     close(fd);

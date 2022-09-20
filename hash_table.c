@@ -70,7 +70,7 @@ void insert_key(hash_table *table, char * key, void * value, size_t value_size){
         if (cur->key != NULL && (strcmp(cur->key, key) == 0)){
             change_value(cur, value, value_size);
             pthread_mutex_unlock(table->locks[index]);
-            break;
+            return;
         }
         prev = cur;
         cur = cur->next;
