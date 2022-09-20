@@ -17,7 +17,7 @@
 #define GET 1
 #define DELETE 2
 #define STOP 3
-#define N_THREADS 8
+#define N_THREADS 4
 
 volatile int RUN;
 

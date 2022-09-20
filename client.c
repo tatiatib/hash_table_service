@@ -33,7 +33,6 @@ void create_insert_operation(request * shared_request, char * key, int value){
 void create_delete_operation(request * shared_request, char * key){
     shared_request->op = DELETE;
     size_t key_length = strlen(key) + 1;
-    size_t int_size = sizeof(int);
     memcpy((char * )shared_request->buffer, &key_length, sizeof(size_t));
     strcpy((char * )shared_request->buffer + sizeof(size_t), key);
 }
@@ -41,7 +40,6 @@ void create_delete_operation(request * shared_request, char * key){
 void create_get_operation(request * shared_request, char * key){
     shared_request->op = GET;
     size_t key_length = strlen(key) + 1;
-    size_t int_size = sizeof(int);
     memcpy((char * )shared_request->buffer, &key_length, sizeof(size_t));
     strcpy((char * )shared_request->buffer + sizeof(size_t), key);
     
