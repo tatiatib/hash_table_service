@@ -7,6 +7,7 @@
 typedef struct request{
     sem_t sem;
     int op;
+    int read;
     char buffer[BUFFER_SIZE];
 }request;
 

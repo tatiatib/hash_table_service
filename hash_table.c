@@ -53,14 +53,30 @@ void table_dispose(hash_table * table){
     free(table);
 }
 
+void change_value(node * cur, void * value, size_t value_size){
+    free(cur->value);
+    cur->value = malloc(value_size);
+    memcpy(cur->value, value, value_size);
+    cur->value_size = value_size;
+}
+
 void insert_key(hash_table *table, char * key, void * value, size_t value_size){
     unsigned long hash_value = hash(key);
     int index = (int)(hash_value % table->cap);
     pthread_mutex_lock(table->locks[index]);
     node * cur = table->values[index];
-    while (cur->next != NULL){
+    node * prev = NULL;
+    while (cur != NULL){
+        if (cur->key != NULL && (strcmp(cur->key, key) == 0)){
+            change_value(cur, value, value_size);
+            pthread_mutex_unlock(table->locks[index]);
+            break;
+        }
+        prev = cur;
         cur = cur->next;
     }
+
+    cur = prev;
     node * new_node = (node *) malloc(sizeof(node));
     new_node->key = (char*) malloc(strlen(key) + 1);
     strcpy(new_node->key, key);
@@ -99,6 +115,7 @@ void delete_node(node * prev, node * cur){
     free(cur->value);
     free(cur);
 }
+
 
 void delete_key(hash_table * table, char * key){
     unsigned long hash_value = hash(key);
